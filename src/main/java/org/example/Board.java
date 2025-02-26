@@ -31,6 +31,7 @@ public class Board extends JPanel {
 
             }
         });
+        initializeBoard();
     }
 
     @Override
@@ -56,6 +57,23 @@ public class Board extends JPanel {
             }
         }
     }
+
+    public void initializeBoard(){
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if ((j == 0 || j == 2) && i % 2 != 0) {
+                    board[i][j] = new PieceImpl(i, j, ColorEnum.WHITE);
+                } else if (j == 1 && i % 2 == 0) {
+                    board[i][j] = new PieceImpl(i, j, ColorEnum.WHITE);
+                }
+                else if ((j == 5 || j == 7) && i % 2 == 0) {
+                    board[i][j] = new PieceImpl(i, j, ColorEnum.BLACK);
+                } else if (j == 6 && i % 2 != 0) {
+                    board[i][j] = new PieceImpl(i, j, ColorEnum.BLACK);
+                }
+            }
+        }
+    }
     public void drawPieces(Graphics g) {
         int windowWidth = getWidth();
         int windowHeight = getHeight();
@@ -64,20 +82,13 @@ public class Board extends JPanel {
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                g.setColor(j==1 || j==0 || j==2 ? Color.white : Color.black);
-                if(j==0 || j==6 || j==2) {
-                    if (i % 2 != 0) {
-                        board[i][j] = new PieceImpl(i,j,g.getColor()==Color.white ? ColorEnum.WHITE : ColorEnum.BLACK);
-                        g.fillOval(i * fieldSize + marginX, j * fieldSize + marginY, pieceSize, pieceSize);
-                    }
-                }if(j==1 || j==5 || j==7) {
-                    if (i % 2 == 0) {
-                        board[i][j] = new PieceImpl(i,j,g.getColor()==Color.white ? ColorEnum.WHITE : ColorEnum.BLACK);
-                        g.fillOval(i * fieldSize + marginX, j * fieldSize + marginY, pieceSize, pieceSize);
-                    }
+                if(board[i][j] != null) {
+                    g.setColor(board[i][j].getColor()==ColorEnum.WHITE ? Color.white : Color.black);
+                    g.fillOval(i * fieldSize + marginX, j * fieldSize + marginY, pieceSize, pieceSize);
                 }
             }
         }
+
         if(selectedPiece != null) {
             selectPiece(g, selectedPiece);
         }
