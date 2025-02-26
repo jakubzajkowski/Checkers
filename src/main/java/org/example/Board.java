@@ -19,12 +19,17 @@ public class Board extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int x = (int)(e.getPoint().getX()/70);
-                int y = (int)(e.getPoint().getY() / 70);
+                int marginX = (getWidth() - boardSize) / 2;
+                int marginY = (getHeight() - boardSize) / 2;
+
+                int x = (e.getX() - marginX) / fieldSize;
+                int y = (e.getY() - marginY) / fieldSize;
 
                 if(board[x][y] != null) {
-                    System.out.println(board[x][y]);
                     selectedPiece = board[x][y];
+                }else if (selectedPiece != null) {
+                    movePiece(selectedPiece, x, y);
+                    selectedPiece = null;
                 }
 
                 repaint();
@@ -92,9 +97,18 @@ public class Board extends JPanel {
         if(selectedPiece != null) {
             selectPiece(g, selectedPiece);
         }
-    }
-    public void movePiece(Graphics g, PieceImpl piece) {
 
+    }
+    public void movePiece(PieceImpl piece, int newX, int newY) {
+        int oldX = piece.getX();
+        int oldY = piece.getY();
+
+        if (Math.abs(newY - oldY) == 1 && Math.abs(newX - oldX) == 1) {
+            board[oldX][oldY] = null;
+            board[newX][newY] = piece;
+            piece.move(newX, newY);
+            repaint();
+        }
     }
 
     public void selectPiece(Graphics g, PieceImpl piece) {

@@ -13,7 +13,8 @@ public class PieceImpl implements Piece {
 
     @Override
     public void move(int x, int y) {
-
+        this.x = x;
+        this.y = y;
     }
 
     @Override
