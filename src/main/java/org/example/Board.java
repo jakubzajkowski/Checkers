@@ -109,6 +109,19 @@ public class Board extends JPanel {
             piece.move(newX, newY);
             repaint();
         }
+        if (Math.abs(newY - oldY) == 2 && Math.abs(newX - oldX) == 2) {
+            int middleX = (newX + oldX)/2;
+            int middleY = (newY + oldY)/2;
+
+            if(board[middleX][middleY] != null && board[middleX][middleY].getColor() != piece.getColor()) {
+                board[oldX][oldY] = null;
+                board[middleX][middleY] = null;
+                board[newX][newY] = piece;
+                piece.move(newX, newY);
+                repaint();
+            }
+        }
+
     }
 
     public void selectPiece(Graphics g, PieceImpl piece) {
