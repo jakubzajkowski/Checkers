@@ -104,10 +104,12 @@ public class Board extends JPanel {
         int oldY = piece.getY();
 
         if (Math.abs(newY - oldY) == 1 && Math.abs(newX - oldX) == 1) {
-            board[oldX][oldY] = null;
-            board[newX][newY] = piece;
-            piece.move(newX, newY);
-            repaint();
+            if((piece.getColor() == ColorEnum.WHITE && oldY<newY) || (piece.getColor() == ColorEnum.BLACK && oldY>newY)) {
+                board[oldX][oldY] = null;
+                board[newX][newY] = piece;
+                piece.move(newX, newY);
+                repaint();
+            }
         }
         if (Math.abs(newY - oldY) == 2 && Math.abs(newX - oldX) == 2) {
             int middleX = (newX + oldX)/2;
@@ -123,7 +125,6 @@ public class Board extends JPanel {
         }
 
     }
-
     public void selectPiece(Graphics g, PieceImpl piece) {
         int windowWidth = getWidth();
         int windowHeight = getHeight();
