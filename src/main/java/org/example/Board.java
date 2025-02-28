@@ -105,10 +105,14 @@ public class Board extends JPanel {
 
         if (Math.abs(newY - oldY) == 1 && Math.abs(newX - oldX) == 1) {
             if((piece.getColor() == ColorEnum.WHITE && oldY<newY) || (piece.getColor() == ColorEnum.BLACK && oldY>newY)) {
+                if ((piece.getColor() == ColorEnum.WHITE && newY == 7) || (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
+                    piece.setKing(true);
+                }
                 board[oldX][oldY] = null;
                 board[newX][newY] = piece;
                 piece.move(newX, newY);
                 repaint();
+
             }
         }
         if (Math.abs(newY - oldY) == 2 && Math.abs(newX - oldX) == 2) {

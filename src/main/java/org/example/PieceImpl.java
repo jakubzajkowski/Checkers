@@ -18,7 +18,7 @@ public class PieceImpl implements Piece {
     }
 
     @Override
-    public void capture(int x, int y) {
+    public void setKing(boolean king) {
 
     }
 
