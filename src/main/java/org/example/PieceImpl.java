@@ -4,11 +4,13 @@ public class PieceImpl implements Piece {
     private int x;
     private int y;
     private ColorEnum color;
+    private boolean king;
 
     public PieceImpl(int x, int y, ColorEnum color) {
         this.x = x;
         this.y = y;
         this.color = color;
+        king = false;
     }
 
     @Override
@@ -19,12 +21,12 @@ public class PieceImpl implements Piece {
 
     @Override
     public void setKing(boolean king) {
-
+        this.king = king;
     }
 
     @Override
     public boolean isKing() {
-        return false;
+        return king;
     }
 
     public ColorEnum getColor() {

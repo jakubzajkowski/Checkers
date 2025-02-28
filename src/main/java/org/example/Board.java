@@ -104,30 +104,81 @@ public class Board extends JPanel {
         int oldY = piece.getY();
 
         if (Math.abs(newY - oldY) == 1 && Math.abs(newX - oldX) == 1) {
-            if((piece.getColor() == ColorEnum.WHITE && oldY<newY) || (piece.getColor() == ColorEnum.BLACK && oldY>newY)) {
-                if ((piece.getColor() == ColorEnum.WHITE && newY == 7) || (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
+            if ((piece.getColor() == ColorEnum.WHITE && oldY < newY) ||
+                    (piece.getColor() == ColorEnum.BLACK && oldY > newY) ||
+                    piece.isKing()) {
+
+                board[oldX][oldY] = null;
+                board[newX][newY] = piece;
+                piece.move(newX, newY);
+
+                // Sprawdzenie awansu na damkę
+                if ((piece.getColor() == ColorEnum.WHITE && newY == 7) ||
+                        (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
                     piece.setKing(true);
                 }
-                board[oldX][oldY] = null;
-                board[newX][newY] = piece;
-                piece.move(newX, newY);
-                repaint();
 
+                repaint();
             }
         }
+
+        // Ruch o dwa pola (bicie przeciwnika)
         if (Math.abs(newY - oldY) == 2 && Math.abs(newX - oldX) == 2) {
-            int middleX = (newX + oldX)/2;
-            int middleY = (newY + oldY)/2;
+            int middleX = (newX + oldX) / 2;
+            int middleY = (newY + oldY) / 2;
 
-            if(board[middleX][middleY] != null && board[middleX][middleY].getColor() != piece.getColor()) {
+            if (board[middleX][middleY] != null && board[middleX][middleY].getColor() != piece.getColor()) {
                 board[oldX][oldY] = null;
-                board[middleX][middleY] = null;
+                board[middleX][middleY] = null;  // Usunięcie zbitego pionka
                 board[newX][newY] = piece;
                 piece.move(newX, newY);
+
+                // Sprawdzenie awansu na damkę
+                if ((piece.getColor() == ColorEnum.WHITE && newY == 7) ||
+                        (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
+                    piece.setKing(true);
+                }
+
                 repaint();
             }
         }
 
+        // Ruch damki (dowolna liczba pól po przekątnej)
+        if (piece.isKing() && Math.abs(newX - oldX) == Math.abs(newY - oldY)) {
+            int deltaX = (newX > oldX) ? 1 : -1;
+            int deltaY = (newY > oldY) ? 1 : -1;
+            int x = oldX + deltaX;
+            int y = oldY + deltaY;
+            boolean isCapture = false;
+            int capturedX = -1, capturedY = -1;
+
+            // Sprawdzenie, czy damka ma czystą drogę
+            while (x != newX && y != newY) {
+                if (board[x][y] != null) {
+                    if (!isCapture && board[x][y].getColor() != piece.getColor()) {
+                        isCapture = true;
+                        capturedX = x;
+                        capturedY = y;
+                    } else {
+                        return; // Nielegalny ruch - droga zablokowana
+                    }
+                }
+                x += deltaX;
+                y += deltaY;
+            }
+
+            // Przesunięcie damki
+            board[oldX][oldY] = null;
+            board[newX][newY] = piece;
+            piece.move(newX, newY);
+
+            // Jeśli było bicie, usuń pionek przeciwnika
+            if (isCapture) {
+                board[capturedX][capturedY] = null;
+            }
+
+            repaint();
+        }
     }
     public void selectPiece(Graphics g, PieceImpl piece) {
         int windowWidth = getWidth();
