@@ -84,12 +84,17 @@ public class Board extends JPanel {
         int windowHeight = getHeight();
         int marginX = (windowWidth - boardSize) / 2 + (fieldSize-pieceSize)/2;
         int marginY = (windowHeight - boardSize) / 2 + (fieldSize-pieceSize)/2;
-
+        int marginXKing = (windowWidth - boardSize) / 2 + (fieldSize-10)/2;
+        int marginYKing = (windowHeight - boardSize) / 2 + (fieldSize-10)/2;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if(board[i][j] != null) {
                     g.setColor(board[i][j].getColor()==ColorEnum.WHITE ? Color.white : Color.black);
                     g.fillOval(i * fieldSize + marginX, j * fieldSize + marginY, pieceSize, pieceSize);
+                    if(board[i][j].isKing()){
+                        g.setColor(Color.ORANGE);
+                        g.fillOval(i * fieldSize + marginXKing, j * fieldSize + marginYKing, 10, 10);
+                    }
                 }
             }
         }
@@ -112,7 +117,6 @@ public class Board extends JPanel {
                 board[newX][newY] = piece;
                 piece.move(newX, newY);
 
-                // Sprawdzenie awansu na damkę
                 if ((piece.getColor() == ColorEnum.WHITE && newY == 7) ||
                         (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
                     piece.setKing(true);
@@ -122,7 +126,6 @@ public class Board extends JPanel {
             }
         }
 
-        // Ruch o dwa pola (bicie przeciwnika)
         if (Math.abs(newY - oldY) == 2 && Math.abs(newX - oldX) == 2) {
             int middleX = (newX + oldX) / 2;
             int middleY = (newY + oldY) / 2;
@@ -142,8 +145,6 @@ public class Board extends JPanel {
                 repaint();
             }
         }
-
-        // Ruch damki (dowolna liczba pól po przekątnej)
         if (piece.isKing() && Math.abs(newX - oldX) == Math.abs(newY - oldY)) {
             int deltaX = (newX > oldX) ? 1 : -1;
             int deltaY = (newY > oldY) ? 1 : -1;
@@ -185,7 +186,13 @@ public class Board extends JPanel {
         int windowHeight = getHeight();
         int marginX = (windowWidth - boardSize) / 2 + (fieldSize-pieceSize-8)/2;
         int marginY = (windowHeight - boardSize) / 2 + (fieldSize-pieceSize-8)/2;
+        int marginXKing = (windowWidth - boardSize) / 2 + (fieldSize-10)/2;
+        int marginYKing = (windowHeight - boardSize) / 2 + (fieldSize-10)/2;
         g.setColor(piece.getColor()==ColorEnum.WHITE ? Color.white : Color.black);
         g.fillOval(piece.getX() * fieldSize + marginX, piece.getY() * fieldSize + marginY, pieceSize+8, pieceSize+8);
+        if(piece.isKing()){
+            g.setColor(Color.ORANGE);
+            g.fillOval(piece.getX() * fieldSize + marginXKing, piece.getY() * fieldSize + marginYKing, 10, 10);
+        }
     }
 }
