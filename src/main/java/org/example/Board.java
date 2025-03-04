@@ -12,6 +12,8 @@ public class Board extends JPanel {
     private final int pieceSize = 60;
     private final int boardSize = 8 * fieldSize;
     private PieceImpl selectedPiece=null;
+    private ColorEnum currentPlayer = ColorEnum.WHITE; // Białe zaczynają
+
 
     private PieceImpl[][] board = new PieceImpl[8][8];
 
@@ -38,6 +40,11 @@ public class Board extends JPanel {
         });
         initializeBoard();
     }
+
+    private void switchPlayer() {
+        currentPlayer = (currentPlayer == ColorEnum.WHITE) ? ColorEnum.BLACK : ColorEnum.WHITE;
+    }
+
 
     @Override
     public void paintComponent(Graphics g){
@@ -108,6 +115,16 @@ public class Board extends JPanel {
         int oldX = piece.getX();
         int oldY = piece.getY();
 
+        // Sprawdzenie, czy pionek należy do aktualnego gracza
+        if (piece.getColor() != currentPlayer) {
+            System.out.println("Teraz ruch ma " + currentPlayer);
+            return;
+        }
+
+        boolean validMove = false;
+        boolean wasCapture = false;
+
+        // Zwykły ruch o jedno pole
         if (Math.abs(newY - oldY) == 1 && Math.abs(newX - oldX) == 1) {
             if ((piece.getColor() == ColorEnum.WHITE && oldY < newY) ||
                     (piece.getColor() == ColorEnum.BLACK && oldY > newY) ||
@@ -116,16 +133,11 @@ public class Board extends JPanel {
                 board[oldX][oldY] = null;
                 board[newX][newY] = piece;
                 piece.move(newX, newY);
-
-                if ((piece.getColor() == ColorEnum.WHITE && newY == 7) ||
-                        (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
-                    piece.setKing(true);
-                }
-
-                repaint();
+                validMove = true;
             }
         }
 
+        // Bicie skokiem o dwa pola
         if (Math.abs(newY - oldY) == 2 && Math.abs(newX - oldX) == 2) {
             int middleX = (newX + oldX) / 2;
             int middleY = (newY + oldY) / 2;
@@ -135,16 +147,12 @@ public class Board extends JPanel {
                 board[middleX][middleY] = null;  // Usunięcie zbitego pionka
                 board[newX][newY] = piece;
                 piece.move(newX, newY);
-
-                // Sprawdzenie awansu na damkę
-                if ((piece.getColor() == ColorEnum.WHITE && newY == 7) ||
-                        (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
-                    piece.setKing(true);
-                }
-
-                repaint();
+                wasCapture = true;
+                validMove = true;
             }
         }
+
+        // Ruch damki
         if (piece.isKing() && Math.abs(newX - oldX) == Math.abs(newY - oldY)) {
             int deltaX = (newX > oldX) ? 1 : -1;
             int deltaY = (newY > oldY) ? 1 : -1;
@@ -153,7 +161,6 @@ public class Board extends JPanel {
             boolean isCapture = false;
             int capturedX = -1, capturedY = -1;
 
-            // Sprawdzenie, czy damka ma czystą drogę
             while (x != newX && y != newY) {
                 if (board[x][y] != null) {
                     if (!isCapture && board[x][y].getColor() != piece.getColor()) {
@@ -168,19 +175,69 @@ public class Board extends JPanel {
                 y += deltaY;
             }
 
-            // Przesunięcie damki
             board[oldX][oldY] = null;
             board[newX][newY] = piece;
             piece.move(newX, newY);
 
-            // Jeśli było bicie, usuń pionek przeciwnika
             if (isCapture) {
                 board[capturedX][capturedY] = null;
+                wasCapture = true;
+            }
+
+            validMove = true;
+        }
+
+        // Sprawdzenie awansu na damkę
+        if (validMove) {
+            if ((piece.getColor() == ColorEnum.WHITE && newY == 7) ||
+                    (piece.getColor() == ColorEnum.BLACK && newY == 0)) {
+                piece.setKing(true);
             }
 
             repaint();
+
+            // Jeśli było bicie i są kolejne możliwe bicia, ten sam gracz gra dalej
+            if (wasCapture && canJumpAgain(piece)) {
+                return;
+            }
+
+            // Przełącz gracza, jeśli ruch był poprawny i nie ma kolejnych bić
+            switchPlayer();
         }
     }
+    private boolean canJumpAgain(PieceImpl piece) {
+        int x = piece.getX();
+        int y = piece.getY();
+        ColorEnum color = piece.getColor();
+
+        // Możliwe kierunki ruchu (dla zwykłych pionków)
+        int[][] directions = {
+                {-1, -1}, {-1, 1}, {1, -1}, {1, 1} // Lewo-góra, prawo-góra, lewo-dół, prawo-dół
+        };
+
+        for (int[] dir : directions) {
+            int midX = x + dir[0];
+            int midY = y + dir[1];
+            int newX = x + 2 * dir[0];
+            int newY = y + 2 * dir[1];
+
+            // Sprawdzenie, czy pola są w granicach planszy
+            if (isInsideBoard(midX, midY) && isInsideBoard(newX, newY)) {
+                // Czy na środkowym polu jest pionek przeciwnika?
+                if (board[midX][midY] != null && board[midX][midY].getColor() != color) {
+                    // Czy docelowe pole jest puste?
+                    if (board[newX][newY] == null) {
+                        return true; // Możliwe bicie
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    private boolean isInsideBoard(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8;
+    }
+
     public void selectPiece(Graphics g, PieceImpl piece) {
         int windowWidth = getWidth();
         int windowHeight = getHeight();
